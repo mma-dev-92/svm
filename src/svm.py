@@ -38,7 +38,7 @@ class SVM:
             dw, L = self.compute_dw_L(self._X, self._w, self._y)
             self._w = self._w - self._learning_rate * dw
             if i % 10000 == 0:
-                print(i, ' | ', L, ' | ', np.linalg.norm(dw))
+                print('iteration ', i, ' | obj = ', L)
 
     def predict(self, X: np.ndarray) -> np.ndarray:
         """
