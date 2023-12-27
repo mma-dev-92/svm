@@ -33,11 +33,12 @@ class SVM:
         self._y: np.ndarray = y
 
     def fit(self) -> None:
+        print('iteration | objective | dw')
         for i in range(self._n_epochs):
             dw, L = self.compute_dw_L(self._X, self._w, self._y)
             self._w = self._w - self._learning_rate * dw
             if i % 10000 == 0:
-                print(i, ' | ', L)
+                print(i, ' | ', L, ' | ', np.linalg.norm(dw))
 
     def predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -67,19 +68,10 @@ class SVM:
 
     def compute_dw_L(self, X: np.ndarray, w: np.ndarray, y: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         distances = self.distances(w)
+        L = 0.5 * np.dot(w, w) - self._scaling_constant * np.sum(distances)
+        sv_indicator = (distances != 0).astype(int)
+        dw = (w - (sv_indicator * self._scaling_constant * y).reshape(-1, 1) * X).sum(axis=0)
 
-        # Get current cost
-        L = 1 / 2 * np.dot(w, w) - self._scaling_constant * np.sum(distances)
-
-        dw = np.zeros(len(w))
-
-        for ind, d in enumerate(distances):
-            if d == 0:  # if sample is not on the support vector
-                di = w  # (alpha * y[ind] * X[ind]) = 0
-            else:
-                # (alpha * y[ind] * X[ind]) = y[ind] * X[ind]
-                di = w - (self._scaling_constant * y[ind] * X[ind])
-            dw += di
         return dw / len(X), L
 
     @property
@@ -88,4 +80,4 @@ class SVM:
 
     @property
     def b(self) -> float:
-        return self._w[0]
+        return float(self._w[0])
